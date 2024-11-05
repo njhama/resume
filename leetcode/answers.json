@@ -1,0 +1,90 @@
+[
+    {
+        "question_number": 1249,
+        "question_title": "Minimum Remove to Make Valid Parentheses",
+        "question_url": "https://leetcode.com/problems/minimum-remove-to-make-valid-parentheses/",
+        "question_description": "Given a string s of '(' , ')' and lowercase English characters, remove the minimum number of parentheses ( '(' or ')', in any positions ) so that the resulting parentheses string is valid and return any valid string.",
+        "examples": [
+            {
+                "input": { "s": "lee(t(c)o)de)" },
+                "output": "lee(t(c)o)de"
+            },
+            {
+                "input": { "s": "a)b(c)d" },
+                "output": "ab(c)d"
+            }
+        ],
+        "constraints": "s consists of lowercase English letters and parentheses '('. ')'.",
+        "tags": ["string", "stack"],
+        "difficulty": "medium",
+        "solution_code": "class Solution(object):\n    def minRemoveToMakeValid(self, s):\n        s = list(s)\n        openVar = 0\n        for i, c in enumerate(s):\n            if c not in '()':\n                continue\n            else:\n                if c == '(': openVar += 1\n                else:\n                    if openVar > 0: openVar -= 1\n                    else: s[i] = ''\n        tmep = list(''.join(s))\n        closedVar2 = 0\n        for i, c in enumerate(reversed(s)):\n            if c in '()':\n                if c == ')': closedVar2 += 1\n                else:\n                    if closedVar2 > 0: closedVar2 -= 1\n                    else: s[len(s) - i - 1] = ''\n        return ''.join(s)",
+        "solution_explanation": "This solution processes the string twice. The first pass removes extra ')' parentheses, and the second pass (in reverse) removes extra '(' parentheses. This ensures that the final string is balanced.",
+        "time_complexity": "O(n)",
+        "space_complexity": "O(n)"
+    },
+    {
+        "question_number": 408,
+        "question_title": "Valid Word Abbreviation",
+        "question_url": "https://leetcode.com/problems/valid-word-abbreviation/",
+        "question_description": "Given a non-empty string word and an abbreviation abbr, return whether the string matches with the given abbreviation.",
+        "examples": [
+            {
+                "input": { "word": "internationalization", "abbr": "i12iz4n" },
+                "output": true
+            },
+            {
+                "input": { "word": "apple", "abbr": "a2e" },
+                "output": false
+            }
+        ],
+        "constraints": "1 <= word.length <= 20. abbr consists of lowercase English letters and digits.",
+        "tags": ["string", "two pointers"],
+        "difficulty": "easy",
+        "solution_code": "class Solution(object):\n    def validWordAbbreviation(self, word, abbr):\n        l = 0\n        r = 0\n        while (l < len(word) and r < len(abbr)):\n            if not abbr[l].isDigit():\n                if word[r] != abbr[l]: return False\n            else:\n                num = 0\n                while l < len(abbr) and abbr[l].isDigit():\n                    num = num * 10 + int(abbr[l])",
+        "solution_explanation": "This solution uses two pointers. The pointer 'l' iterates through 'word' while 'r' iterates through 'abbr'. If 'abbr[r]' is a digit, it builds the number representing skipped characters. Otherwise, it compares the characters directly.",
+        "time_complexity": "O(n)",
+        "space_complexity": "O(1)"
+    },
+    {
+        "question_number": 680,
+        "question_title": "Valid Palindrome II",
+        "question_url": "https://leetcode.com/problems/valid-palindrome-ii/",
+        "question_description": "Given a string s, return true if the s can be palindrome after deleting at most one character from it.",
+        "examples": [
+            {
+                "input": { "s": "abca" },
+                "output": true
+            },
+            {
+                "input": { "s": "racecar" },
+                "output": true
+            }
+        ],
+        "constraints": "s consists of lowercase English letters.",
+        "tags": ["string", "two pointers"],
+        "difficulty": "easy",
+        "solution_code": "class Solution(object):\n    def validPalindrome(self, s):\n        if s == s[::-1]:\n            return True\n        l, r = 0, len(s) - 1\n        while l < r:\n            if s[l] != s[r]:\n                return s[l+1:r+1] == s[l+1:r+1][::-1] or s[l:r] == s[l:r][::-1]\n            l += 1\n            r -= 1\n        return True",
+        "solution_explanation": "The function uses a two-pointer approach. If a mismatch is found, it checks if skipping either the left or right character makes the rest of the substring a palindrome. This ensures that only one deletion is required at most.",
+        "time_complexity": "O(n)",
+        "space_complexity": "O(1)"
+    },
+    {
+        "question_number": 528,
+        "question_title": "Random Pick with Weight",
+        "question_url": "https://leetcode.com/problems/random-pick-with-weight/",
+        "question_description": "Given an array w of positive integers, where w[i] describes the weight of index i, write a function that randomly picks an index in proportion to its weight.",
+        "examples": [
+            {
+                "input": { "w": [1, 3] },
+                "output": "Randomly returns index 0 with probability 1/4 and index 1 with probability 3/4."
+            }
+        ],
+        "constraints": "1 <= w.length <= 10000, 1 <= w[i] <= 10^5.",
+        "tags": ["binary search", "prefix sum", "random"],
+        "difficulty": "medium",
+        "solution_code": "import random\n\nclass Solution(object):\n\n    def __init__(self, w):\n        \"\"\"\n        :type w: List[int]\n        \"\"\"\n        self.cumulative_sum = []\n        total = 0\n        for weight in w:\n            total += weight\n            self.cumulative_sum.append(total)\n        self.total_sum = total  # Store the total sum for later use\n\n    def pickIndex(self):\n        \"\"\"\n        :rtype: int\n        \"\"\"\n        target = random.randint(1, self.total_sum)\n\n        # Binary search to find the right index for the target\n        low, high = 0, len(self.cumulative_sum) - 1\n        while low < high:\n            mid = (low + high) // 2\n            if target > self.cumulative_sum[mid]:\n                low = mid + 1\n            else:\n                high = mid\n        return low",
+        "solution_explanation": "The solution calculates a cumulative sum of weights and then uses binary search to randomly select an index based on the target weight. The target is a random integer within the range of the cumulative sum, ensuring weighted randomness.",
+        "time_complexity": "O(log n) for pickIndex, O(n) for __init__",
+        "space_complexity": "O(n)"
+    }
+]

@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+     <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css">
+    <title>LeetCode Questions</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #121212;
+            color: #ffffff;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 800px;
+            margin: 2rem auto;
+            background: #1e1e1e;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+        }
+        .question {
+            border-bottom: 1px solid #333;
+            padding-bottom: 1rem;
+            margin-bottom: 1rem;
+        }
+        .question h2 {
+            margin: 0;
+        }
+        .question a {
+            text-decoration: none;
+            color: #64b5f6;
+        }
+        .question a:hover {
+            text-decoration: underline;
+        }
+        .examples {
+            background: #2c2c2c;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+        }
+        pre {
+            background: #1e1e1e;
+            padding: 1rem;
+            border-radius: 8px;
+            overflow: auto;
+            color: #f8f8f2;
+        }
+        .code-block {
+            position: relative;
+            background: #2c2c2c;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+        }
+        .copy-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+        .copy-button:hover {
+            background-color: #0056b3;
+        }
+        .difficulty-tag {
+            background-color: #444;
+            color: #fff;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            margin-left: 0.5rem;
+        }
+        .difficulty-tag.easy {
+            background-color: #4caf50;
+        }
+        .difficulty-tag.medium {
+            background-color: #ff9800;
+        }
+        .difficulty-tag.hard {
+            background-color: #f44336;
+        }
+    </style>
+   
+</head>
+<body>
+    <div class="container">
+        <h1>LeetCode Questions</h1>
+        <div id="questions"></div>
+    </div>
+
+    <script>
+        fetch('answers.json')
+            .then(response => response.json())
+            .then(jsonData => {
+                renderQuestions(jsonData);
+            })
+            .catch(error => console.error('Error loading JSON data:', error));
+
+            function renderQuestions(jsonData) {
+    const container = document.getElementById('questions');
+    jsonData.forEach(question => {
+        const questionDiv = document.createElement('div');
+        questionDiv.classList.add('question');
+
+        const title = document.createElement('h2');
+        title.innerHTML = `<a href="${question.question_url}" target="_blank">${question.question_number}. ${question.question_title}</a>`;
+
+        const difficultyTag = document.createElement('span');
+        difficultyTag.classList.add('difficulty-tag', question.difficulty.toLowerCase());
+        difficultyTag.textContent = question.difficulty;
+        title.appendChild(difficultyTag);
+
+        questionDiv.appendChild(title);
+
+        const description = document.createElement('p');
+        description.textContent = question.question_description;
+        questionDiv.appendChild(description);
+
+        const tags = document.createElement('p');
+        tags.innerHTML = `<strong>Tags:</strong> ${question.tags.join(', ')}`;
+        questionDiv.appendChild(tags);
+
+        const examplesDiv = document.createElement('div');
+        examplesDiv.classList.add('examples');
+        const examplesTitle = document.createElement('h4');
+        examplesTitle.textContent = 'Examples:';
+        examplesDiv.appendChild(examplesTitle);
+
+        question.examples.forEach(example => {
+            const exampleText = document.createElement('p');
+            exampleText.innerHTML = `<strong>Input:</strong> ${JSON.stringify(example.input)}<br><strong>Output:</strong> ${example.output}`;
+            examplesDiv.appendChild(exampleText);
+        });
+        questionDiv.appendChild(examplesDiv);
+
+        const codeBlock = document.createElement('div');
+        codeBlock.classList.add('code-block');
+
+        const copyButton = document.createElement('button');
+        copyButton.classList.add('copy-button');
+        copyButton.textContent = 'Copy';
+        copyButton.onclick = () => {
+            navigator.clipboard.writeText(question.solution_code).then(() => {
+                alert('Code copied to clipboard!');
+            });
+        };
+        codeBlock.appendChild(copyButton);
+
+        // Add <pre><code> block for syntax highlighting with Prism
+        const solutionCode = document.createElement('pre');
+        const codeElement = document.createElement('code');
+        codeElement.classList.add('language-python'); // Specify language for Prism.js
+        codeElement.textContent = question.solution_code;
+
+        solutionCode.appendChild(codeElement);
+        codeBlock.appendChild(solutionCode);
+        questionDiv.appendChild(codeBlock);
+
+        const solutionExplanation = document.createElement('p');
+        solutionExplanation.innerHTML = `<strong>Solution Explanation:</strong> ${question.solution_explanation}`;
+        questionDiv.appendChild(solutionExplanation);
+
+        container.appendChild(questionDiv);
+    });
+
+    // Trigger Prism to highlight code blocks after they are added to the DOM
+    Prism.highlightAll();
+}
+
+
+        document.addEventListener('DOMContentLoaded', () => {
+            fetch('answers.json')
+                .then(response => response.json())
+                .then(jsonData => renderQuestions(jsonData))
+                .catch(error => console.error('Error loading JSON data:', error));
+        });
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+</body>
+</html>
