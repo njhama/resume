@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-     <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="styles.css">
     <title>LeetCode Questions</title>
     <style>
@@ -89,99 +89,148 @@
         .difficulty-tag.hard {
             background-color: #f44336;
         }
+        .sort-controls {
+            margin-bottom: 1rem;
+            display: flex;
+            justify-content: flex-start;
+        }
+        .sort-dropdown {
+            background-color: #8c60cd;
+            color: white;
+            border: none;
+            border-radius: 14px;
+            padding: 10px 10px;
+            cursor: pointer;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
     </style>
    
 </head>
 <body>
     <div class="container">
-        <h1>LeetCode Questions</h1>
+        <div class="header">
+            <h1>LeetCode Questions</h1>
+            <select class="sort-dropdown" onchange="sortQuestions(this.value)">
+                <option value="">Sort by</option>
+                <option value="difficulty">Difficulty</option>
+                <option value="title">Title</option>
+                <option value="number">Question Number</option>
+            </select>
+        </div>
+        <hr style="border: 1px solid #333; margin-bottom: 2rem;">
         <div id="questions"></div>
     </div>
 
     <script>
+        let questionsData = [];
+
         fetch('answers.json')
             .then(response => response.json())
             .then(jsonData => {
-                renderQuestions(jsonData);
+                questionsData = jsonData;
+                renderQuestions(questionsData);
             })
             .catch(error => console.error('Error loading JSON data:', error));
 
-            function renderQuestions(jsonData) {
-    const container = document.getElementById('questions');
-    jsonData.forEach(question => {
-        const questionDiv = document.createElement('div');
-        questionDiv.classList.add('question');
+        function renderQuestions(jsonData) {
+            const container = document.getElementById('questions');
+            container.innerHTML = ''; // Clear existing content
+            jsonData.forEach(question => {
+                const questionDiv = document.createElement('div');
+                questionDiv.classList.add('question');
 
-        const title = document.createElement('h2');
-        title.innerHTML = `<a href="${question.question_url}" target="_blank">${question.question_number}. ${question.question_title}</a>`;
+                const title = document.createElement('h2');
+                title.innerHTML = `<a href="${question.question_url}" target="_blank">${question.question_number}. ${question.question_title}</a>`;
 
-        const difficultyTag = document.createElement('span');
-        difficultyTag.classList.add('difficulty-tag', question.difficulty.toLowerCase());
-        difficultyTag.textContent = question.difficulty;
-        title.appendChild(difficultyTag);
+                const difficultyTag = document.createElement('span');
+                difficultyTag.classList.add('difficulty-tag', question.difficulty.toLowerCase());
+                difficultyTag.textContent = question.difficulty;
+                title.appendChild(difficultyTag);
 
-        questionDiv.appendChild(title);
+                questionDiv.appendChild(title);
 
-        const description = document.createElement('p');
-        description.textContent = question.question_description;
-        questionDiv.appendChild(description);
+                const description = document.createElement('p');
+                description.textContent = question.question_description;
+                questionDiv.appendChild(description);
 
-        const tags = document.createElement('p');
-        tags.innerHTML = `<strong>Tags:</strong> ${question.tags.join(', ')}`;
-        questionDiv.appendChild(tags);
+                const tags = document.createElement('p');
+                tags.innerHTML = `<strong>Tags:</strong> ${question.tags.join(', ')}`;
+                questionDiv.appendChild(tags);
 
-        const examplesDiv = document.createElement('div');
-        examplesDiv.classList.add('examples');
-        const examplesTitle = document.createElement('h4');
-        examplesTitle.textContent = 'Examples:';
-        examplesDiv.appendChild(examplesTitle);
+                const examplesDiv = document.createElement('div');
+                examplesDiv.classList.add('examples');
+                const examplesTitle = document.createElement('h4');
+                examplesTitle.textContent = 'Examples:';
+                examplesDiv.appendChild(examplesTitle);
 
-        question.examples.forEach(example => {
-            const exampleText = document.createElement('p');
-            exampleText.innerHTML = `<strong>Input:</strong> ${JSON.stringify(example.input)}<br><strong>Output:</strong> ${example.output}`;
-            examplesDiv.appendChild(exampleText);
-        });
-        questionDiv.appendChild(examplesDiv);
+                question.examples.forEach(example => {
+                    const exampleText = document.createElement('p');
+                    exampleText.innerHTML = `<strong>Input:</strong> ${JSON.stringify(example.input)}<br><strong>Output:</strong> ${example.output}`;
+                    examplesDiv.appendChild(exampleText);
+                });
+                questionDiv.appendChild(examplesDiv);
 
-        const codeBlock = document.createElement('div');
-        codeBlock.classList.add('code-block');
+                const codeBlock = document.createElement('div');
+                codeBlock.classList.add('code-block');
 
-        const copyButton = document.createElement('button');
-        copyButton.classList.add('copy-button');
-        copyButton.textContent = 'Copy';
-        copyButton.onclick = () => {
-            navigator.clipboard.writeText(question.solution_code).then(() => {
-                alert('Code copied to clipboard!');
+                const copyButton = document.createElement('button');
+                copyButton.classList.add('copy-button');
+                copyButton.textContent = 'Copy';
+                copyButton.onclick = () => {
+                    navigator.clipboard.writeText(question.solution_code).then(() => {
+                        alert('Code copied to clipboard!');
+                    });
+                };
+                codeBlock.appendChild(copyButton);
+
+                // Add <pre><code> block for syntax highlighting with Prism
+                const solutionCode = document.createElement('pre');
+                const codeElement = document.createElement('code');
+                codeElement.classList.add('language-python'); // Specify language for Prism.js
+                codeElement.textContent = question.solution_code;
+
+                solutionCode.appendChild(codeElement);
+                codeBlock.appendChild(solutionCode);
+                questionDiv.appendChild(codeBlock);
+
+                const solutionExplanation = document.createElement('p');
+                solutionExplanation.innerHTML = `<strong>Solution Explanation:</strong> ${question.solution_explanation}`;
+                questionDiv.appendChild(solutionExplanation);
+
+                container.appendChild(questionDiv);
+                const separator = document.createElement('hr');
+                separator.style.border = "1px solid #333"; // Optional style for customization
+                separator.style.marginBottom = "2rem"; // Add margin below the separator
+                container.appendChild(separator);
             });
-        };
-        codeBlock.appendChild(copyButton);
 
-        // Add <pre><code> block for syntax highlighting with Prism
-        const solutionCode = document.createElement('pre');
-        const codeElement = document.createElement('code');
-        codeElement.classList.add('language-python'); // Specify language for Prism.js
-        codeElement.textContent = question.solution_code;
+            // Trigger Prism to highlight code blocks after they are added to the DOM
+            Prism.highlightAll();
+        }
 
-        solutionCode.appendChild(codeElement);
-        codeBlock.appendChild(solutionCode);
-        questionDiv.appendChild(codeBlock);
-
-        const solutionExplanation = document.createElement('p');
-        solutionExplanation.innerHTML = `<strong>Solution Explanation:</strong> ${question.solution_explanation}`;
-        questionDiv.appendChild(solutionExplanation);
-
-        container.appendChild(questionDiv);
-    });
-
-    // Trigger Prism to highlight code blocks after they are added to the DOM
-    Prism.highlightAll();
-}
-
+        function sortQuestions(criteria) {
+            if (criteria === 'difficulty') {
+                questionsData.sort((a, b) => a.difficulty.localeCompare(b.difficulty));
+            } else if (criteria === 'title') {
+                questionsData.sort((a, b) => a.question_title.localeCompare(b.question_title));
+            } else if (criteria === 'number') {
+                questionsData.sort((a, b) => a.question_number - b.question_number);
+            }
+            renderQuestions(questionsData);
+        }
 
         document.addEventListener('DOMContentLoaded', () => {
             fetch('answers.json')
                 .then(response => response.json())
-                .then(jsonData => renderQuestions(jsonData))
+                .then(jsonData => {
+                    questionsData = jsonData;
+                    renderQuestions(questionsData);
+                })
                 .catch(error => console.error('Error loading JSON data:', error));
         });
     </script>
