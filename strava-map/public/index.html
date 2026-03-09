@@ -1,0 +1,869 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Strava Activity Map</title>
+
+  <!-- Leaflet -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #1a1a2e;
+      color: #e8e8e8;
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Portfolio nav bar ── */
+    #portfolio-nav {
+      height: 44px;
+      min-height: 44px;
+      background: rgb(27,30,34);
+      display: flex;
+      align-items: center;
+      padding: 0 16px;
+      gap: 16px;
+      border-bottom: 1px solid rgba(255,255,255,0.07);
+      z-index: 2000;
+    }
+
+    #portfolio-nav a {
+      color: #E2E8F0;
+      text-decoration: none;
+      font-size: 13px;
+      padding: 4px 10px;
+      border-radius: 6px;
+      background: rgba(255,255,255,0.08);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: background 0.15s;
+    }
+
+    #portfolio-nav a:hover { background: rgba(255,255,255,0.15); }
+
+    #portfolio-nav .nav-title {
+      font-size: 13px;
+      font-weight: 600;
+      background: linear-gradient(45deg, #00A3E0, #1E88E5);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    /* ── Main area below nav ── */
+    #app-body {
+      flex: 1;
+      display: flex;
+      overflow: hidden;
+    }
+
+    /* ── Sidebar ── */
+    #sidebar {
+      width: 300px;
+      min-width: 300px;
+      background: #16213e;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      overflow-x: hidden;
+      z-index: 1000;
+      border-right: 1px solid #0f3460;
+      transition: width 0.25s ease, min-width 0.25s ease;
+    }
+
+    #sidebar.collapsed {
+      width: 0;
+      min-width: 0;
+    }
+
+    /* ── Sidebar toggle tab ── */
+    #sidebar-toggle {
+      position: fixed;
+      top: 50%;
+      transform: translateY(-50%);
+      left: 300px;
+      z-index: 1001;
+      width: 18px;
+      height: 48px;
+      background: #0f3460;
+      border: 1px solid #1a4a8a;
+      border-left: none;
+      border-radius: 0 6px 6px 0;
+      color: #aaa;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      transition: left 0.25s ease, background 0.15s;
+      padding: 0;
+      line-height: 1;
+    }
+
+    #sidebar-toggle:hover {
+      background: #1a4a8a;
+      color: #fff;
+    }
+
+    #sidebar-header {
+      padding: 20px 16px 16px;
+      background: #0f3460;
+      border-bottom: 2px solid #fc4c02;
+    }
+
+    #sidebar-header h1 {
+      font-size: 18px;
+      font-weight: 700;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    #sidebar-header h1 .strava-icon {
+      font-size: 22px;
+    }
+
+    .section {
+      padding: 16px;
+      border-bottom: 1px solid #0f3460;
+    }
+
+    .section-title {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #888;
+      margin-bottom: 10px;
+    }
+
+    /* ── Auth section ── */
+    #auth-section {
+      padding: 24px 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      text-align: center;
+    }
+
+    #auth-section p {
+      color: #aaa;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .btn-strava {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      background: #fc4c02;
+      color: #fff;
+      text-decoration: none;
+      border: none;
+      border-radius: 6px;
+      padding: 12px 20px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      width: 100%;
+      transition: background 0.15s;
+    }
+
+    .btn-strava:hover { background: #e04400; }
+
+    /* ── Athlete profile ── */
+    #athlete-section {
+      display: none;
+    }
+
+    #athlete-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    #athlete-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: 2px solid #fc4c02;
+      object-fit: cover;
+    }
+
+    #athlete-name {
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    #logout-btn {
+      font-size: 11px;
+      color: #888;
+      background: none;
+      border: none;
+      cursor: pointer;
+      text-decoration: underline;
+      padding: 0;
+    }
+
+    #logout-btn:hover { color: #fc4c02; }
+
+    /* ── Stats ── */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .stat-box {
+      background: #0f3460;
+      border-radius: 6px;
+      padding: 10px;
+      text-align: center;
+    }
+
+    .stat-value {
+      font-size: 20px;
+      font-weight: 700;
+      color: #fc4c02;
+      line-height: 1;
+    }
+
+    .stat-label {
+      font-size: 10px;
+      color: #888;
+      margin-top: 3px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    /* ── Filters ── */
+    .filter-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .filter-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .filter-item input[type=checkbox] {
+      width: 15px;
+      height: 15px;
+      accent-color: #fc4c02;
+      cursor: pointer;
+    }
+
+    .filter-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .filter-label {
+      font-size: 13px;
+      flex: 1;
+    }
+
+    .filter-count {
+      font-size: 11px;
+      color: #666;
+      background: #0f3460;
+      padding: 1px 6px;
+      border-radius: 10px;
+    }
+
+    /* ── Sync ── */
+    #sync-btn {
+      width: 100%;
+      background: #fc4c02;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      padding: 10px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s, opacity 0.15s;
+    }
+
+    #sync-btn:hover:not(:disabled) { background: #e04400; }
+    #sync-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    #sync-status {
+      font-size: 11px;
+      color: #888;
+      margin-top: 6px;
+      text-align: center;
+      min-height: 16px;
+    }
+
+    #sync-status.success { color: #27ae60; }
+    #sync-status.error   { color: #e74c3c; }
+
+    /* ── Map controls ── */
+    #map-controls {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .map-style-btn {
+      background: #0f3460;
+      border: 1px solid #1a4a8a;
+      color: #ccc;
+      border-radius: 5px;
+      padding: 7px 10px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .map-style-btn:hover, .map-style-btn.active {
+      background: #1a4a8a;
+      color: #fff;
+      border-color: #fc4c02;
+    }
+
+    /* ── Activity tooltip/popup ── */
+    .leaflet-popup-content-wrapper {
+      background: #1a1a2e;
+      color: #e8e8e8;
+      border: 1px solid #0f3460;
+      border-radius: 8px;
+    }
+
+    .leaflet-popup-tip { background: #1a1a2e; }
+
+    .popup-content h3 {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: #fc4c02;
+    }
+
+    .popup-content .popup-meta {
+      font-size: 12px;
+      color: #aaa;
+      line-height: 1.7;
+    }
+
+    .popup-content .popup-meta span {
+      color: #e8e8e8;
+      font-weight: 500;
+    }
+
+    /* ── Map ── */
+    #map {
+      flex: 1;
+      height: 100%;
+    }
+
+    /* ── Loading overlay ── */
+    #loading {
+      position: fixed;
+      inset: 0;
+      background: rgba(26,26,46,0.85);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 12px;
+      z-index: 9999;
+      display: none;
+    }
+
+    .spinner {
+      width: 36px;
+      height: 36px;
+      border: 3px solid #333;
+      border-top-color: #fc4c02;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    #loading p {
+      color: #ccc;
+      font-size: 14px;
+    }
+
+    /* ── Route count badge ── */
+    #route-count {
+      position: absolute;
+      bottom: 30px;
+      right: 10px;
+      z-index: 1000;
+      background: rgba(26,26,46,0.9);
+      color: #e8e8e8;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      border: 1px solid #0f3460;
+      pointer-events: none;
+    }
+
+    /* ── Error banner ── */
+    #error-banner {
+      display: none;
+      background: #7c1a1a;
+      color: #f8b4b4;
+      padding: 10px 16px;
+      font-size: 12px;
+      border-bottom: 1px solid #c0392b;
+    }
+
+    /* ── No activities ── */
+    #no-activities {
+      display: none;
+      padding: 16px;
+      text-align: center;
+      color: #888;
+      font-size: 13px;
+    }
+
+    /* Scrollbar styling */
+    #sidebar::-webkit-scrollbar { width: 4px; }
+    #sidebar::-webkit-scrollbar-track { background: #16213e; }
+    #sidebar::-webkit-scrollbar-thumb { background: #0f3460; border-radius: 2px; }
+  </style>
+</head>
+<body>
+
+<!-- Portfolio nav -->
+<nav id="portfolio-nav">
+  <a href="/"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 5l-7 7 7 7"/></svg> Back</a>
+  <span class="nav-title">Nicky Hama</span>
+</nav>
+
+<!-- App body (sidebar + map) -->
+<div id="app-body">
+
+<!-- Sidebar -->
+<div id="sidebar">
+  <div id="sidebar-header">
+    <h1><span class="strava-icon">🏃</span> Strava Map</h1>
+  </div>
+
+  <div id="error-banner"></div>
+
+  <!-- Not logged in -->
+  <div id="auth-section">
+    <p>Connect your Strava account to see all your activities on a map.</p>
+    <a href="/auth/strava" class="btn-strava">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066m-7.008-5.599l2.836 5.598h4.172L10.463 0l-7 13.828h4.169"/>
+      </svg>
+      Connect with Strava
+    </a>
+  </div>
+
+  <!-- Logged in sections -->
+  <div id="athlete-section" class="section" style="display:none">
+    <div class="section-title">Account</div>
+    <div id="athlete-info">
+      <img id="athlete-avatar" src="" alt="Avatar" />
+      <div>
+        <div id="athlete-name">Loading...</div>
+        <button id="logout-btn" onclick="logout()">Disconnect</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="stats-section" class="section" style="display:none">
+    <div class="section-title">Stats</div>
+    <div class="stats-grid">
+      <div class="stat-box">
+        <div class="stat-value" id="stat-total">0</div>
+        <div class="stat-label">Activities</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-value" id="stat-km">0</div>
+        <div class="stat-label">Total km</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-value" id="stat-runs">0</div>
+        <div class="stat-label">Runs</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-value" id="stat-rides">0</div>
+        <div class="stat-label">Rides</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="filter-section" class="section" style="display:none">
+    <div class="section-title">Filter by type</div>
+    <div class="filter-list">
+      <label class="filter-item">
+        <input type="checkbox" checked data-group="run" onchange="applyFilters()" />
+        <span class="filter-dot" style="background:#fc4c02"></span>
+        <span class="filter-label">Running</span>
+        <span class="filter-count" id="count-run">0</span>
+      </label>
+      <label class="filter-item">
+        <input type="checkbox" checked data-group="ride" onchange="applyFilters()" />
+        <span class="filter-dot" style="background:#3498db"></span>
+        <span class="filter-label">Cycling</span>
+        <span class="filter-count" id="count-ride">0</span>
+      </label>
+      <label class="filter-item">
+        <input type="checkbox" checked data-group="walk" onchange="applyFilters()" />
+        <span class="filter-dot" style="background:#2ecc71"></span>
+        <span class="filter-label">Walk / Hike</span>
+        <span class="filter-count" id="count-walk">0</span>
+      </label>
+      <label class="filter-item">
+        <input type="checkbox" checked data-group="other" onchange="applyFilters()" />
+        <span class="filter-dot" style="background:#9b59b6"></span>
+        <span class="filter-label">Other</span>
+        <span class="filter-count" id="count-other">0</span>
+      </label>
+    </div>
+  </div>
+
+  <div id="sync-section" class="section" style="display:none">
+    <div class="section-title">Data</div>
+    <button id="sync-btn" onclick="syncActivities()">Sync from Strava</button>
+    <div id="sync-status"></div>
+    <div id="no-activities">No activities cached yet.<br/>Click Sync to fetch them.</div>
+  </div>
+
+  <div id="map-section" class="section" style="display:none">
+    <div class="section-title">Map Style</div>
+    <div id="map-controls">
+      <button class="map-style-btn active" onclick="setMapStyle('dark', this)">Dark</button>
+      <button class="map-style-btn" onclick="setMapStyle('streets', this)">Streets</button>
+      <button class="map-style-btn" onclick="setMapStyle('satellite', this)">Satellite</button>
+    </div>
+  </div>
+</div>
+
+<!-- Sidebar toggle -->
+<button id="sidebar-toggle" onclick="toggleSidebar()" title="Toggle sidebar">‹</button>
+
+<!-- Map -->
+<div id="map"></div>
+
+<!-- Route count -->
+<div id="route-count" style="display:none">0 routes shown</div>
+
+</div><!-- /#app-body -->
+
+<!-- Loading overlay -->
+<div id="loading">
+  <div class="spinner"></div>
+  <p id="loading-text">Loading activities...</p>
+</div>
+
+<script>
+// ─── Polyline decoder (Google encoded polyline algorithm) ─────────────────────
+function decodePolyline(encoded) {
+  const points = [];
+  let index = 0, lat = 0, lng = 0;
+  while (index < encoded.length) {
+    let b, shift = 0, result = 0;
+    do { b = encoded.charCodeAt(index++) - 63; result |= (b & 0x1f) << shift; shift += 5; } while (b >= 0x20);
+    lat += (result & 1) ? ~(result >> 1) : (result >> 1);
+    shift = 0; result = 0;
+    do { b = encoded.charCodeAt(index++) - 63; result |= (b & 0x1f) << shift; shift += 5; } while (b >= 0x20);
+    lng += (result & 1) ? ~(result >> 1) : (result >> 1);
+    points.push([lat / 1e5, lng / 1e5]);
+  }
+  return points;
+}
+
+// ─── Activity type helpers ────────────────────────────────────────────────────
+const TYPE_COLORS = {
+  run:   '#fc4c02',
+  ride:  '#3498db',
+  walk:  '#2ecc71',
+  other: '#9b59b6'
+};
+
+function getGroup(type) {
+  const t = (type || '').toLowerCase();
+  if (['run','virtualrun','trailrun'].includes(t)) return 'run';
+  if (['ride','virtualride','mountainbikeride','gravelride','ebikeride'].includes(t)) return 'ride';
+  if (['walk','hike'].includes(t)) return 'walk';
+  return 'other';
+}
+
+function formatDistance(m) {
+  if (!m) return '—';
+  return m >= 1000 ? (m / 1000).toFixed(2) + ' km' : m.toFixed(0) + ' m';
+}
+
+function formatDuration(secs) {
+  if (!secs) return '—';
+  const h = Math.floor(secs / 3600);
+  const m = Math.floor((secs % 3600) / 60);
+  const s = secs % 60;
+  return h > 0 ? `${h}h ${m}m` : `${m}m ${s}s`;
+}
+
+function formatDate(dateStr) {
+  if (!dateStr) return '—';
+  return new Date(dateStr).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+}
+
+// ─── Map setup ────────────────────────────────────────────────────────────────
+const tileLayers = {
+  dark: L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+    attribution: '&copy; OpenStreetMap &copy; CARTO', maxZoom: 19
+  }),
+  streets: L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; OpenStreetMap contributors', maxZoom: 19
+  }),
+  satellite: L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+    attribution: 'Tiles &copy; Esri', maxZoom: 19
+  })
+};
+
+const map = L.map('map', { center: [20, 0], zoom: 2, layers: [tileLayers.dark] });
+let routeLayer = L.layerGroup().addTo(map);
+let allActivities = [];
+let polylinesByGroup = { run: [], ride: [], walk: [], other: [] };
+
+function setMapStyle(style, btn) {
+  Object.values(tileLayers).forEach(l => map.removeLayer(l));
+  tileLayers[style].addTo(map);
+  document.querySelectorAll('.map-style-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+// ─── Render routes ────────────────────────────────────────────────────────────
+function renderActivities(activities) {
+  routeLayer.clearLayers();
+  polylinesByGroup = { run: [], ride: [], walk: [], other: [] };
+
+  let runCount = 0, rideCount = 0, walkCount = 0, otherCount = 0;
+  const bounds = [];
+
+  activities.forEach(act => {
+    if (!act.summary_polyline) return;
+    const group = getGroup(act.type);
+    const color = TYPE_COLORS[group];
+    const pts = decodePolyline(act.summary_polyline);
+    if (!pts.length) return;
+
+    bounds.push(...pts);
+
+    const line = L.polyline(pts, {
+      color,
+      weight: 2.5,
+      opacity: 0.7,
+      smoothFactor: 1
+    });
+
+    line.bindPopup(`
+      <div class="popup-content">
+        <h3>${act.name || 'Activity'}</h3>
+        <div class="popup-meta">
+          Date: <span>${formatDate(act.start_date)}</span><br/>
+          Distance: <span>${formatDistance(act.distance)}</span><br/>
+          Time: <span>${formatDuration(act.moving_time)}</span><br/>
+          Elevation: <span>${act.total_elevation_gain ? act.total_elevation_gain.toFixed(0) + ' m' : '—'}</span><br/>
+          Type: <span>${act.sport_type || act.type || '—'}</span>
+        </div>
+      </div>
+    `, { maxWidth: 220 });
+
+    line.on('mouseover', () => line.setStyle({ weight: 4, opacity: 1 }));
+    line.on('mouseout', () => line.setStyle({ weight: 2.5, opacity: 0.7 }));
+
+    polylinesByGroup[group].push(line);
+
+    if (group === 'run')  runCount++;
+    else if (group === 'ride') rideCount++;
+    else if (group === 'walk') walkCount++;
+    else otherCount++;
+  });
+
+  document.getElementById('count-run').textContent   = runCount;
+  document.getElementById('count-ride').textContent  = rideCount;
+  document.getElementById('count-walk').textContent  = walkCount;
+  document.getElementById('count-other').textContent = otherCount;
+
+  applyFilters(false);
+
+  if (bounds.length > 0) {
+    map.fitBounds(L.latLngBounds(bounds), { padding: [20, 20] });
+  }
+}
+
+function applyFilters(recount = true) {
+  routeLayer.clearLayers();
+  let shown = 0;
+
+  document.querySelectorAll('.filter-item input[type=checkbox]').forEach(cb => {
+    const group = cb.dataset.group;
+    if (cb.checked) {
+      polylinesByGroup[group].forEach(line => { routeLayer.addLayer(line); shown++; });
+    }
+  });
+
+  const badge = document.getElementById('route-count');
+  badge.textContent = `${shown} route${shown !== 1 ? 's' : ''} shown`;
+  badge.style.display = shown > 0 ? 'block' : 'none';
+}
+
+// ─── API calls ────────────────────────────────────────────────────────────────
+async function loadStatus() {
+  const res = await fetch('/api/status');
+  const data = await res.json();
+
+  if (!data.authenticated) {
+    document.getElementById('auth-section').style.display = 'flex';
+    return false;
+  }
+
+  document.getElementById('auth-section').style.display = 'none';
+  document.getElementById('athlete-section').style.display = 'block';
+  document.getElementById('stats-section').style.display = 'block';
+  document.getElementById('filter-section').style.display = 'block';
+  document.getElementById('sync-section').style.display = 'block';
+  document.getElementById('map-section').style.display = 'block';
+
+  if (data.athlete) {
+    document.getElementById('athlete-name').textContent = data.athlete.athlete_name || 'Athlete';
+    const avatar = document.getElementById('athlete-avatar');
+    if (data.athlete.athlete_profile) avatar.src = data.athlete.athlete_profile;
+    avatar.onerror = () => avatar.style.display = 'none';
+
+    if (data.athlete.last_synced) {
+      const d = new Date(data.athlete.last_synced * 1000);
+      document.getElementById('sync-status').textContent =
+        `Last synced: ${d.toLocaleDateString()} ${d.toLocaleTimeString()}`;
+    }
+  }
+
+  if (data.stats) {
+    document.getElementById('stat-total').textContent = data.stats.total || 0;
+    document.getElementById('stat-km').textContent    = data.stats.total_km || 0;
+    document.getElementById('stat-runs').textContent  = data.stats.runs || 0;
+    document.getElementById('stat-rides').textContent = data.stats.rides || 0;
+  }
+
+  return true;
+}
+
+async function loadActivities() {
+  showLoading('Loading cached activities...');
+  try {
+    const res = await fetch('/api/activities');
+    allActivities = await res.json();
+
+    if (allActivities.length === 0) {
+      document.getElementById('no-activities').style.display = 'block';
+      hideLoading();
+      return;
+    }
+
+    document.getElementById('no-activities').style.display = 'none';
+    renderActivities(allActivities);
+  } catch (err) {
+    showError('Failed to load activities: ' + err.message);
+  }
+  hideLoading();
+}
+
+async function syncActivities() {
+  const btn = document.getElementById('sync-btn');
+  const status = document.getElementById('sync-status');
+  btn.disabled = true;
+  btn.textContent = 'Syncing...';
+  status.textContent = 'Fetching all activities from Strava...';
+  status.className = '';
+  showLoading('Syncing from Strava (this may take a moment for large accounts)...');
+
+  try {
+    const res = await fetch('/api/sync');
+    const data = await res.json();
+
+    if (data.success) {
+      status.textContent = `Synced ${data.synced} activities.`;
+      status.className = 'success';
+      await loadStatus();
+      await loadActivities();
+    } else {
+      status.textContent = data.error || 'Sync failed.';
+      status.className = 'error';
+    }
+  } catch (err) {
+    status.textContent = 'Sync failed: ' + err.message;
+    status.className = 'error';
+  }
+
+  btn.disabled = false;
+  btn.textContent = 'Sync from Strava';
+  hideLoading();
+}
+
+function logout() {
+  window.location.href = '/auth/logout';
+}
+
+// ─── UI helpers ───────────────────────────────────────────────────────────────
+function showLoading(text) {
+  document.getElementById('loading-text').textContent = text || 'Loading...';
+  document.getElementById('loading').style.display = 'flex';
+}
+
+function hideLoading() {
+  document.getElementById('loading').style.display = 'none';
+}
+
+function showError(msg) {
+  const b = document.getElementById('error-banner');
+  b.textContent = msg;
+  b.style.display = 'block';
+  setTimeout(() => b.style.display = 'none', 6000);
+}
+
+// ─── Check for URL error params ───────────────────────────────────────────────
+const urlParams = new URLSearchParams(window.location.search);
+if (urlParams.get('error')) {
+  const messages = {
+    denied: 'Strava authorization was denied.',
+    auth_failed: 'Authentication failed. Check your API credentials.'
+  };
+  showError(messages[urlParams.get('error')] || 'An error occurred.');
+  history.replaceState({}, '', '/');
+}
+
+// ─── Sidebar toggle ───────────────────────────────────────────────────────────
+function toggleSidebar() {
+  const sidebar = document.getElementById('sidebar');
+  const btn = document.getElementById('sidebar-toggle');
+  const collapsed = sidebar.classList.toggle('collapsed');
+  btn.style.left = collapsed ? '0px' : '300px';
+  btn.textContent = collapsed ? '›' : '‹';
+  setTimeout(() => map.invalidateSize(), 260); // let Leaflet re-measure after transition
+}
+
+// ─── Init ─────────────────────────────────────────────────────────────────────
+(async () => {
+  const authed = await loadStatus();
+  if (authed) await loadActivities();
+})();
+</script>
+</body>
+</html>
