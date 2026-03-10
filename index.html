@@ -3,311 +3,540 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nicky Hama</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/chakra-ui/1.6.12/chakra-ui.min.css" integrity="sha512-k6RqeWeci5ZR/Lv4MR0sA0FfDOMSa12Kpa/kklFU+Eka6pKHFrLhF4G5C5Mx/qjK/MeSTMRQh30+OGZ++8hdw==" crossorigin="anonymous" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" integrity="sha512-Fo3rlrZj/k7ujTnHg4CGR2D7kSs0v4LLanw2qksYuRlEzO+tcaEPQogQ0KaoGN26/zrn20ImR1DfuLWnOo7aBA==" crossorigin="anonymous" />
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+    <title>Nicky Hama — Software Engineer</title>
+    <meta name="description" content="Nicky Hama — MS CS @ USC, Software Engineer. Prev: Salesforce, Genentech, Boeing.">
     <link rel="icon" href="./img/logo.jpg" type="image/x-icon">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --bg:           #07080C;
+            --card:         rgba(255,255,255,0.04);
+            --card-hover:   rgba(255,255,255,0.07);
+            --border:       rgba(255,255,255,0.07);
+            --border-glow:  rgba(0,212,255,0.35);
+            --text:         #F1F5F9;
+            --muted:        #94A3B8;
+            --dim:          #64748B;
+            --a1:           #00D4FF;
+            --a2:           #8B5CF6;
+            --a3:           #00FFD1;
+        }
+
+        html { scroll-behavior: smooth; }
+
         body {
-            background-color: rgb(27,30,34);
-            color: white;
-            margin: 0;
-            padding: 0;
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             line-height: 1.6;
+            min-height: 100vh;
+            overflow-x: hidden;
         }
 
-        .chakra-container {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 40px 20px;
+        /* ─── BACKGROUND ORBS ─────────────────────────── */
+        .bg-orbs {
+            position: fixed; inset: 0;
+            z-index: 0; pointer-events: none; overflow: hidden;
+        }
+        .orb {
+            position: absolute; border-radius: 50%;
+            filter: blur(110px); opacity: 0.13;
+        }
+        .orb-1 {
+            width: 750px; height: 750px;
+            background: radial-gradient(circle, #00D4FF 0%, transparent 70%);
+            top: -320px; left: -280px;
+            animation: drift1 28s ease-in-out infinite;
+        }
+        .orb-2 {
+            width: 650px; height: 650px;
+            background: radial-gradient(circle, #8B5CF6 0%, transparent 70%);
+            bottom: -250px; right: -200px;
+            animation: drift2 32s ease-in-out infinite;
+        }
+        .orb-3 {
+            width: 450px; height: 450px;
+            background: radial-gradient(circle, #00FFD1 0%, transparent 70%);
+            top: 45%; left: 55%;
+            animation: drift3 22s ease-in-out infinite;
+        }
+        @keyframes drift1 {
+            0%,100% { transform: translate(0,0) scale(1); }
+            33%     { transform: translate(70px,50px) scale(1.05); }
+            66%     { transform: translate(20px,-40px) scale(0.95); }
+        }
+        @keyframes drift2 {
+            0%,100% { transform: translate(0,0) scale(1); }
+            33%     { transform: translate(-60px,-50px) scale(1.08); }
+            66%     { transform: translate(30px,30px) scale(0.96); }
+        }
+        @keyframes drift3 {
+            0%,100% { transform: translate(0,0); }
+            50%     { transform: translate(50px,-70px); }
         }
 
-        h1 {
-            font-size: 2.5rem;
-            margin-bottom: 0.5rem;
-            font-weight: 700;
-            background: linear-gradient(45deg, #00A3E0, #1E88E5);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+        /* Grain overlay */
+        .grain {
+            position: fixed; inset: 0; z-index: 1;
+            pointer-events: none; opacity: 0.028;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 300 300' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+            background-size: 220px;
         }
 
-        .contact-links {
-            margin: 20px 0;
-            display: flex;
-            flex-wrap: nowrap;
-            gap: 12px;
-            overflow-x: auto;
-            padding-bottom: 4px;
+        /* Cursor glow */
+        #cursor-glow {
+            position: fixed; pointer-events: none;
+            width: 500px; height: 500px; border-radius: 50%;
+            background: radial-gradient(circle, rgba(0,212,255,0.045) 0%, transparent 65%);
+            transform: translate(-50%,-50%);
+            transition: left 0.15s ease, top 0.15s ease;
+            z-index: 1; mix-blend-mode: screen;
         }
 
-        .contact-links a {
-            color: #E2E8F0;
-            text-decoration: none;
-            padding: 6px 12px;
-            border-radius: 6px;
-            background: rgba(255, 255, 255, 0.1);
-            transition: all 0.3s ease;
-            display: inline-flex;
-            align-items: center;
+        /* ─── LAYOUT ──────────────────────────────────── */
+        .container {
+            position: relative; z-index: 2;
+            max-width: 860px; margin: 0 auto;
+            padding: 88px 24px 120px;
+        }
+
+        /* ─── HERO ────────────────────────────────────── */
+        .hero { margin-bottom: 88px; }
+
+        .hero h1 {
+            font-size: clamp(3.2rem, 9vw, 6rem);
+            font-weight: 900; line-height: 1.0;
+            letter-spacing: -0.035em; margin-bottom: 18px;
+            background: linear-gradient(125deg, #ffffff 0%, var(--a1) 40%, var(--a2) 80%, var(--a3) 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text; background-size: 250% 250%;
+            animation: shimmer 7s ease-in-out infinite;
+        }
+        @keyframes shimmer {
+            0%,100% { background-position: 0% 50%; }
+            50%     { background-position: 100% 50%; }
+        }
+
+        .hero-sub {
+            font-size: 1.1rem; color: var(--muted);
+            margin-bottom: 24px; min-height: 1.8rem;
+            display: flex; align-items: center; gap: 2px;
+        }
+        .tw-cursor {
+            display: inline-block; width: 2px; height: 1.1em;
+            background: var(--a1); margin-left: 1px; vertical-align: middle;
+            animation: blink 1s step-end infinite;
+        }
+        @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+        .hero-loc {
+            display: inline-flex; align-items: center; gap: 6px;
+            color: var(--dim); font-size: 0.88rem; margin-bottom: 30px;
+        }
+        .hero-loc i { color: var(--a1); font-size: 0.78rem; }
+
+        /* Contact pills */
+        .links { display: flex; flex-wrap: wrap; gap: 10px; }
+        .links a {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 8px 18px; border-radius: 100px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--border);
+            color: var(--muted); text-decoration: none;
+            font-size: 0.83rem; font-weight: 500;
+            transition: all 0.28s cubic-bezier(.34,1.56,.64,1);
+            position: relative; overflow: hidden;
+        }
+        .links a::after {
+            content: ''; position: absolute; inset: 0;
+            background: linear-gradient(135deg,rgba(0,212,255,.1),rgba(139,92,246,.1));
+            opacity: 0; transition: opacity .3s;
+        }
+        .links a:hover {
+            border-color: var(--border-glow); color: var(--text);
+            transform: translateY(-3px) scale(1.03);
+            box-shadow: 0 8px 28px rgba(0,212,255,0.14);
+        }
+        .links a:hover::after { opacity: 1; }
+        .links a i { font-size: 0.82rem; color: var(--a1); }
+
+        /* ─── SECTION SHELL ───────────────────────────── */
+        .section { margin-bottom: 72px; }
+
+        .sec-head {
+            display: flex; align-items: center; gap: 12px;
+            margin-bottom: 22px;
+        }
+        .sec-icon {
+            width: 36px; height: 36px; border-radius: 10px; flex-shrink: 0;
+            background: linear-gradient(135deg,rgba(0,212,255,.12),rgba(139,92,246,.12));
+            border: 1px solid rgba(0,212,255,.18);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.95rem; color: var(--a1);
+        }
+        .sec-head h2 {
+            font-size: 0.78rem; font-weight: 700; letter-spacing: 0.12em;
+            text-transform: uppercase; color: var(--muted);
+        }
+        .sec-line {
+            flex: 1; height: 1px;
+            background: linear-gradient(to right, rgba(0,212,255,.18), transparent);
+        }
+
+        /* ─── CARDS ───────────────────────────────────── */
+        .cards { display: flex; flex-direction: column; gap: 10px; }
+
+        .card {
+            position: relative;
+            display: flex; align-items: center; gap: 18px;
+            padding: 16px 20px; border-radius: 16px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            transition: background .3s ease, border-color .3s ease, box-shadow .3s ease;
+            overflow: hidden; transform-style: preserve-3d; will-change: transform;
+        }
+        /* left glow bar */
+        .card::before {
+            content: ''; position: absolute;
+            left: 0; top: 10%; bottom: 10%;
+            width: 2px; border-radius: 2px;
+            background: linear-gradient(to bottom, var(--a1), var(--a2));
+            opacity: 0; transition: opacity .3s ease;
+        }
+        /* inner gradient sheen */
+        .card::after {
+            content: ''; position: absolute; inset: 0;
+            background: linear-gradient(135deg,rgba(0,212,255,.025),rgba(139,92,246,.025));
+            opacity: 0; transition: opacity .3s ease;
+        }
+        .card:hover {
+            background: var(--card-hover);
+            border-color: var(--border-glow);
+            box-shadow: 0 0 0 1px rgba(0,212,255,.08),
+                        0 24px 48px rgba(0,0,0,.35),
+                        inset 0 1px 0 rgba(255,255,255,.04);
+        }
+        .card:hover::before, .card:hover::after { opacity: 1; }
+
+        .logo-wrap { flex-shrink: 0; }
+        .logo {
+            width: 48px; height: 48px; border-radius: 12px;
+            object-fit: cover; border: 1px solid var(--border);
+            transition: border-color .3s, box-shadow .3s;
+        }
+        .card:hover .logo {
+            border-color: rgba(0,212,255,.28);
+            box-shadow: 0 0 18px rgba(0,212,255,.18);
+        }
+
+        .card-body { flex: 1; min-width: 0; }
+        .card-title { font-size: .97rem; font-weight: 600; color: var(--text); margin-bottom: 2px; }
+        .card-role  { font-size: .85rem; color: var(--muted); margin-bottom: 0; }
+
+        .date-pill {
+            flex-shrink: 0;
+            display: inline-flex; align-items: center;
+            padding: 3px 12px; border-radius: 100px;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid var(--border);
+            font-size: 0.74rem; color: var(--dim);
             white-space: nowrap;
-            font-size: 0.9rem;
         }
 
-        .contact-links a:hover {
-            background: rgba(255, 255, 255, 0.2);
-            transform: translateY(-2px);
+        /* ─── SKILLS ──────────────────────────────────── */
+        .skills { display: flex; flex-wrap: wrap; gap: 8px; }
+        .sk {
+            padding: 6px 15px; border-radius: 100px;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid var(--border);
+            font-size: 0.79rem; font-weight: 500; color: var(--muted);
+            cursor: default;
+            transition: all 0.22s cubic-bezier(.34,1.56,.64,1);
+        }
+        .sk:hover {
+            background: rgba(0,212,255,0.08);
+            border-color: rgba(0,212,255,0.25);
+            color: var(--a1); transform: translateY(-3px) scale(1.04);
         }
 
-        .contact-links a i {
-            margin-right: 6px;
-            font-size: 0.9rem;
+        /* ─── SCROLL REVEAL ───────────────────────────── */
+        .reveal {
+            opacity: 0; transform: translateY(28px);
+            transition: opacity .65s ease, transform .65s ease;
         }
+        .reveal.on { opacity: 1; transform: translateY(0); }
 
-        .section-header {
-            display: flex;
-            align-items: center;
-            margin: 32px 0 20px;
-            padding-bottom: 8px;
-            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+        /* ─── FOOTER ──────────────────────────────────── */
+        footer {
+            position: relative; z-index: 2;
+            text-align: center; padding: 36px 24px;
+            color: var(--dim); font-size: 0.78rem;
+            border-top: 1px solid var(--border);
         }
+        footer a { color: var(--a1); text-decoration: none; }
+        footer a:hover { text-decoration: underline; }
 
-        .section-header .material-symbols-outlined {
-            font-size: 28px;
-            margin-right: 12px;
-            color: #00A3E0;
-        }
-
-        .section-header h2 {
-            font-size: 1.5rem;
-            font-weight: 600;
-            margin: 0;
-        }
-
-        .experience-item {
-            display: flex;
-            align-items: center;
-            margin-bottom: 16px;
-            padding: 12px;
-            border-radius: 12px;
-            background: rgba(255, 255, 255, 0.05);
-            transition: all 0.3s ease;
-        }
-
-        .experience-item:hover {
-            background: rgba(255, 255, 255, 0.08);
-            transform: translateX(8px);
-        }
-
-        .company-logo {
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            margin-right: 16px;
-            object-fit: cover;
-            border: 2px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .experience-content {
-            flex: 1;
-        }
-
-        .company-name {
-            font-size: 1rem;
-            font-weight: 600;
-            margin: 0 0 2px 0;
-            color: #E2E8F0;
-        }
-
-        .role {
-            font-size: 0.9rem;
-            color: #A0AEC0;
-            margin: 0 0 2px 0;
-        }
-
-        .date {
-            font-size: 0.85rem;
-            color: #718096;
-        }
-
-        @media (max-width: 640px) {
-            .chakra-container {
-                padding: 20px;
-            }
-
-            h1 {
-                font-size: 2rem;
-            }
-
-            .experience-item {
-                padding: 12px;
-            }
+        /* ─── RESPONSIVE ──────────────────────────────── */
+        @media (max-width: 600px) {
+            .container { padding: 52px 16px 80px; }
+            .card { flex-wrap: wrap; }
+            .date-pill { align-self: flex-start; margin-top: 4px; }
+            #cursor-glow { display: none; }
         }
     </style>
 </head>
 <body>
 
-    <div class="chakra-container css-1j9nz5b" style="padding: 20px;">
-        <h1>Nicky Hama</h1>
-        <div style="margin-bottom: 10px; font-size: 1rem; font-weight: medium; display: flex; align-items: center;">
-            <i class="fas fa-map-marker-alt" style="margin-right: 8px;"></i>
-            San Francisco, CA
-        </div>
-        <div class="contact-links" style="margin-top: 16px;">
-            <script type="text/javascript">
-                var user = "njhama";
-                var domain = "usc.edu";
-                document.write('<a href="mailto:' + user + '@' + domain + '"><i class="fas fa-envelope"></i>' + user + '@' + domain + '</a>');
-            </script>
-            <script type="text/javascript">
-                var user = "nicky";
-                var domain = "hama.dev";
-                document.write('<a href="mailto:' + user + '@' + domain + '"><i class="fas fa-envelope"></i>' + user + '@' + domain + '</a>');
-            </script>
-            <a href="https://www.linkedin.com/in/nickyhama" target="_blank"><i class="fab fa-linkedin"></i>/nickyhama</a>
-            <a href="https://github.com/njhama" target="_blank"><i class="fab fa-github"></i>/njhama</a>
-            <a href="https://app.codesignal.com/coding-report/52rsDLxfn2JKYcAW9-SWu72gPAAs2y8HdBXL4Zuw8t?accessToken=52rsDLxfn2JKYcAW9-RjdZ92HdraaFKJeuatZedbTu"><i class="fas fa-terminal"></i>CodeSignal</a>
-            <a href="/map"><i class="fas fa-route"></i>Activity Map</a>
-        </div>
-        <div class="chakra-stack css-e3vu25" style="align-items: flex-start;">
-            <!-- Education Section -->
-            <div class="section-header">
-                <div class="material-symbols-outlined">school</div>
-                <h2>Education</h2>
-            </div>
-
-            <div class="chakra-stack css-h0vh7w" style="width: 100%;">
-                <!-- ONE -->
-                <div class="experience-item">
-                    <img src="./img/usc4.png" alt="USC logo" class="company-logo">
-                    <div class="experience-content">
-                        <h3 class="company-name">University of Southern California</h3>
-                        <p class="role">M.S Computer Science</p>
-                        <p class="date">Expected May 2026 - 4.00 GPA</p>
-                    </div>
-                </div>
-                
-                <!-- TWO -->
-                <div class="experience-item">
-                    <img src="./img/usc4.png" alt="USC logo" class="company-logo">
-                    <div class="experience-content">
-                        <h3 class="company-name">University of Southern California</h3>
-                        <p class="role">B.S Computer Science & Minor in Artifical Intelligence</p>
-                        <p class="date">Expected May 2025 - 3.9 GPA</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Experience Section -->
-            <div class="section-header">
-                <div class="material-symbols-outlined">work</div>
-                <h2>Work Experience</h2>
-            </div>
-
-            <div class="chakra-stack css-h0vh7w" style="width: 100%;">
-                <!-- ONE -->
-                <div class="experience-item">
-                    <img src="./img/Salesforce-logo.webp" alt="Salesforce logo" class="company-logo">
-                    <div class="experience-content">
-                        <h3 class="company-name">Salesforce</h3>
-                        <p class="role">Software Engineering Intern</p>
-                        <p class="date">May 2025 – Aug 2025</p>
-                    </div>
-                </div>
-
-                <!-- TWO -->
-                <div class="experience-item">
-                    <img src="./img/prescient.jpg" alt="Prescient Design logo" class="company-logo">
-                    <div class="experience-content">
-                        <h3 class="company-name">Prescient Design</h3>
-                        <p class="role">Software Engineering Intern</p>
-                        <p class="date">May 2024 – Aug 2024</p>
-                    </div>
-                </div>
-
-                <!-- THREE -->
-                <div class="experience-item">
-                    <img src="./img/genentech.jpg" alt="Genentech logo" class="company-logo">
-                    <div class="experience-content">
-                        <h3 class="company-name">Genentech</h3>
-                        <p class="role">Software Engineering Intern</p>
-                        <p class="date">May 2024 – Aug 2024</p>
-                    </div>
-                </div>
-
-                <!-- FOUR -->
-                <div class="experience-item">
-                    <img src="./img/millennium.jpg" alt="Millennium Space Systems logo" class="company-logo">
-                    <div class="experience-content">
-                        <h3 class="company-name">Boeing (Millennium Space Systems)</h3>
-                        <p class="role">Software & Data Engineering Analyst</p>
-                        <p class="date">May 2023 – Jan 2024</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- INVOLVEMENT / LEADERSHIP -->
-            <div class="section-header">
-                <div class="material-symbols-outlined">groups</div>
-                <h2>Involvement & Leadership</h2>
-            </div>
-
-            <div class="chakra-stack css-h0vh7w" style="width: 100%;">
-                <!-- ONE -->
-                <div class="experience-item">
-                    <img src="./img/sase.jpg" alt="Organization 1 logo" class="company-logo">
-                    <div class="experience-content">
-                        <h3 class="company-name">USC Society of Asian Scientists & Engineers</h3>
-                        <p class="role">Director of Marketing</p>
-                        <p class="date">Jan 2024 - Present</p>
-                    </div>
-                </div>
-
-                <!-- TWO -->
-                <div class="experience-item">
-                    <img src="./img/viterbi.jpg" alt="Organization 2 logo" class="company-logo">
-                    <div class="experience-content">
-                        <h3 class="company-name">USC Viterbi School of Engineering</h3>
-                        <p class="role">VLP CS Tutor - CS103 C++, CS104 Data Structures, CS201 Java, CS270 Algorithms</p>
-                        <p class="date">Jan 2024 - Present</p>
-                    </div>
-                </div>
-
-                <!-- THREE -->
-                <div class="experience-item">
-                    <img src="./img/annenberg.jpg" alt="Organization 3 logo" class="company-logo">
-                    <div class="experience-content">
-                        <h3 class="company-name">USC Annenberg Media</h3>
-                        <p class="role">Web Developer</p>
-                        <p class="date">Jan 2023 - May 2024</p>
-                    </div>
-                </div>
-
-                <!-- FOUR -->
-                <div class="experience-item">
-                    <img src="./img/formula.jpg" alt="Organization 4 logo" class="company-logo">
-                    <div class="experience-content">
-                        <h3 class="company-name">USC Formula Electric</h3>
-                        <p class="role">Systems Engineer</p>
-                        <p class="date">Aug 2022 - Dec 2023</p>
-                    </div>
-                </div>
-            </div>
-        </div>
+    <!-- Background -->
+    <div class="bg-orbs" aria-hidden="true">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
     </div>
-    <script>
-        // Function to handle routing
-        function handleRouting() {
-            const path = window.location.pathname;
+    <div class="grain" aria-hidden="true"></div>
+    <div id="cursor-glow" aria-hidden="true"></div>
 
-            if (path === '/code') {
-                window.location.href = 'https://app.coderpad.io/RZT36CH7';
+    <div class="container">
+
+        <!-- ── HERO ──────────────────────────── -->
+        <section class="hero reveal">
+            <h1>Nicky Hama</h1>
+            <p class="hero-sub"><span id="tw"></span><span class="tw-cursor"></span></p>
+            <div class="hero-loc"><i class="fas fa-location-dot"></i>San Francisco, CA</div>
+            <div class="links">
+                <a id="ml1"><i class="fas fa-envelope"></i><span id="e1t"></span></a>
+                <a id="ml2"><i class="fas fa-envelope"></i><span id="e2t"></span></a>
+                <a href="https://www.linkedin.com/in/nickyhama" target="_blank" rel="noopener">
+                    <i class="fab fa-linkedin"></i>LinkedIn
+                </a>
+                <a href="https://github.com/njhama" target="_blank" rel="noopener">
+                    <i class="fab fa-github"></i>GitHub
+                </a>
+                <a href="https://app.codesignal.com/coding-report/52rsDLxfn2JKYcAW9-SWu72gPAAs2y8HdBXL4Zuw8t?accessToken=52rsDLxfn2JKYcAW9-RjdZ92HdraaFKJeuatZedbTu" target="_blank" rel="noopener">
+                    <i class="fas fa-terminal"></i>CodeSignal
+                </a>
+                <a href="/map"><i class="fas fa-route"></i>Activity Map</a>
+            </div>
+        </section>
+
+        <!-- ── EDUCATION ─────────────────────── -->
+        <section class="section reveal" style="transition-delay:.08s">
+            <div class="sec-head">
+                <div class="sec-icon"><i class="fas fa-graduation-cap"></i></div>
+                <h2>Education</h2>
+                <div class="sec-line"></div>
+            </div>
+            <div class="cards">
+                <div class="card">
+                    <div class="logo-wrap"><img src="./img/usc4.png" alt="USC" class="logo"></div>
+                    <div class="card-body">
+                        <div class="card-title">University of Southern California</div>
+                        <div class="card-role">M.S. Computer Science</div>
+                    </div>
+                    <div class="date-pill">Expected May 2026</div>
+                </div>
+                <div class="card">
+                    <div class="logo-wrap"><img src="./img/usc4.png" alt="USC" class="logo"></div>
+                    <div class="card-body">
+                        <div class="card-title">University of Southern California</div>
+                        <div class="card-role">B.S. Computer Science &amp; Minor in Artificial Intelligence</div>
+                    </div>
+                    <div class="date-pill">Expected May 2025</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ── EXPERIENCE ─────────────────────── -->
+        <section class="section reveal" style="transition-delay:.16s">
+            <div class="sec-head">
+                <div class="sec-icon"><i class="fas fa-briefcase"></i></div>
+                <h2>Work Experience</h2>
+                <div class="sec-line"></div>
+            </div>
+            <div class="cards">
+                <div class="card">
+                    <div class="logo-wrap"><img src="./img/Salesforce-logo.webp" alt="Salesforce" class="logo"></div>
+                    <div class="card-body">
+                        <div class="card-title">Salesforce</div>
+                        <div class="card-role">Software Engineering Intern</div>
+                    </div>
+                    <div class="date-pill">May – Aug 2025</div>
+                </div>
+                <div class="card">
+                    <div class="logo-wrap"><img src="./img/prescient.jpg" alt="Prescient Design" class="logo"></div>
+                    <div class="card-body">
+                        <div class="card-title">Prescient Design</div>
+                        <div class="card-role">Software Engineering Intern</div>
+                    </div>
+                    <div class="date-pill">May – Aug 2024</div>
+                </div>
+                <div class="card">
+                    <div class="logo-wrap"><img src="./img/genentech.jpg" alt="Genentech" class="logo"></div>
+                    <div class="card-body">
+                        <div class="card-title">Genentech</div>
+                        <div class="card-role">Software Engineering Intern</div>
+                    </div>
+                    <div class="date-pill">May – Aug 2024</div>
+                </div>
+                <div class="card">
+                    <div class="logo-wrap"><img src="./img/millennium.jpg" alt="Boeing" class="logo"></div>
+                    <div class="card-body">
+                        <div class="card-title">Boeing (Millennium Space Systems)</div>
+                        <div class="card-role">Software &amp; Data Engineering Analyst</div>
+                    </div>
+                    <div class="date-pill">May 2023 – Jan 2024</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ── SKILLS ────────────────────────── -->
+        <section class="section reveal" style="transition-delay:.24s">
+            <div class="sec-head">
+                <div class="sec-icon"><i class="fas fa-code"></i></div>
+                <h2>Skills</h2>
+                <div class="sec-line"></div>
+            </div>
+            <div class="skills">
+                <span class="sk">Python</span>
+                <span class="sk">Java</span>
+                <span class="sk">C++</span>
+                <span class="sk">JavaScript</span>
+                <span class="sk">TypeScript</span>
+                <span class="sk">SQL</span>
+                <span class="sk">Bash</span>
+                <span class="sk">React</span>
+                <span class="sk">Node.js</span>
+                <span class="sk">Express</span>
+                <span class="sk">Git</span>
+                <span class="sk">Docker</span>
+                <span class="sk">AWS</span>
+                <span class="sk">Linux</span>
+            </div>
+        </section>
+
+        <!-- ── INVOLVEMENT ───────────────────── -->
+        <section class="section reveal" style="transition-delay:.32s">
+            <div class="sec-head">
+                <div class="sec-icon"><i class="fas fa-users"></i></div>
+                <h2>Involvement &amp; Leadership</h2>
+                <div class="sec-line"></div>
+            </div>
+            <div class="cards">
+                <div class="card">
+                    <div class="logo-wrap"><img src="./img/sase.jpg" alt="SASE" class="logo"></div>
+                    <div class="card-body">
+                        <div class="card-title">USC Society of Asian Scientists &amp; Engineers</div>
+                        <div class="card-role">Director of Marketing</div>
+                    </div>
+                    <div class="date-pill">Jan 2024 – Present</div>
+                </div>
+                <div class="card">
+                    <div class="logo-wrap"><img src="./img/viterbi.jpg" alt="Viterbi" class="logo"></div>
+                    <div class="card-body">
+                        <div class="card-title">USC Viterbi School of Engineering</div>
+                        <div class="card-role">VLP CS Tutor — CS103, CS104, CS201, CS270</div>
+                    </div>
+                    <div class="date-pill">Jan 2024 – Present</div>
+                </div>
+                <div class="card">
+                    <div class="logo-wrap"><img src="./img/annenberg.jpg" alt="Annenberg" class="logo"></div>
+                    <div class="card-body">
+                        <div class="card-title">USC Annenberg Media</div>
+                        <div class="card-role">Web Developer</div>
+                    </div>
+                    <div class="date-pill">Jan 2023 – May 2024</div>
+                </div>
+                <div class="card">
+                    <div class="logo-wrap"><img src="./img/formula.jpg" alt="Formula Electric" class="logo"></div>
+                    <div class="card-body">
+                        <div class="card-title">USC Formula Electric</div>
+                        <div class="card-role">Systems Engineer</div>
+                    </div>
+                    <div class="date-pill">Aug 2022 – Dec 2023</div>
+                </div>
+            </div>
+        </section>
+
+    </div><!-- /container -->
+
+    <footer>
+        <p>Nicky Hama &nbsp;·&nbsp; <a href="https://github.com/njhama" target="_blank" rel="noopener">njhama</a></p>
+    </footer>
+
+    <script>
+    (() => {
+        // ── Email obfuscation ──────────────────────
+        const e1 = 'njhama' + '@' + 'usc.edu';
+        const e2 = 'nicky'  + '@' + 'hama.dev';
+        const ml1 = document.getElementById('ml1');
+        const ml2 = document.getElementById('ml2');
+        document.getElementById('e1t').textContent = e1;
+        document.getElementById('e2t').textContent = e2;
+        ml1.href = 'mailto:' + e1;
+        ml2.href = 'mailto:' + e2;
+
+        // ── Typewriter ─────────────────────────────
+        const phrases = [
+            'Software Engineer',
+            'MS CS @ USC  ·  4.0 GPA',
+            'Prev: Salesforce · Genentech · Boeing',
+            'Full-Stack Developer',
+        ];
+        let pi = 0, ci = 0, del = false;
+        const tw = document.getElementById('tw');
+        function tick() {
+            const cur = phrases[pi];
+            if (!del) {
+                tw.textContent = cur.slice(0, ci + 1);
+                ci++;
+                if (ci === cur.length) { del = true; setTimeout(tick, 2200); return; }
+            } else {
+                tw.textContent = cur.slice(0, ci - 1);
+                ci--;
+                if (ci === 0) { del = false; pi = (pi + 1) % phrases.length; }
             }
+            setTimeout(tick, del ? 38 : 62);
         }
-        handleRouting();
+        tick();
+
+        // ── Scroll reveal ──────────────────────────
+        const io = new IntersectionObserver(entries => {
+            entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('on'); io.unobserve(e.target); } });
+        }, { threshold: 0.08 });
+        document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+        // ── Card 3-D tilt ──────────────────────────
+        document.querySelectorAll('.card').forEach(card => {
+            card.addEventListener('mousemove', e => {
+                const r = card.getBoundingClientRect();
+                const x = (e.clientX - r.left) / r.width  - 0.5;
+                const y = (e.clientY - r.top)  / r.height - 0.5;
+                card.style.transform =
+                    `perspective(700px) rotateX(${-y * 3.5}deg) rotateY(${x * 6}deg) translateZ(4px)`;
+            });
+            card.addEventListener('mouseleave', () => { card.style.transform = ''; });
+        });
+
+        // ── Cursor glow ────────────────────────────
+        const glow = document.getElementById('cursor-glow');
+        if (glow && window.matchMedia('(pointer:fine)').matches) {
+            let mx = 0, my = 0, cx = 0, cy = 0;
+            document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
+            (function raf() {
+                cx += (mx - cx) * 0.1; cy += (my - cy) * 0.1;
+                glow.style.left = cx + 'px'; glow.style.top = cy + 'px';
+                requestAnimationFrame(raf);
+            })();
+        }
+
+        // ── /code redirect ─────────────────────────
+        if (window.location.pathname === '/code')
+            window.location.href = 'https://app.coderpad.io/RZT36CH7';
+    })();
     </script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/chakra-ui/1.6.12/chakra-ui.min.js" integrity="sha512-jmZo/SNIZVNjpNMBz5NxW3TLiUTpxaAXbFF4GhY3mDdT9B6Ojx5g+5ImK09xnu/NRCXB3h+ccbd5KMFdC1kCZQ==" crossorigin="anonymous"></script>
 </body>
 </html>
